@@ -675,6 +675,10 @@ def _load_state_dict_into_meta_model(
                 if is_fsdp_enabled() or is_deepspeed_zero3_enabled():
                     param_name = hf_quantizer.get_param_name(param_name)
                     module, param_type = get_module_from_name(model, param_name)
+                    # check if attribute exists, seems like it has been deleted
+                    # in load_and_swizzle_mxfp4 in quantizer_mxfp4.py
+                    if not hasattr(module, param_type):
+                        continue
                     value = getattr(module, param_type)
                     # We need to wait until the quantized value is created
                     if value.device.type == "meta":
